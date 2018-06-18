@@ -1,14 +1,11 @@
 % genetic algorithm script
-clear all; close all; clc; addpath(genpath('.\'));
-
+clear all; close all; clc;
 
 i = 1;
-% filename_vec{i} = 'sppnw08.txt'; optimal_vec{i} = 35894; i = i+1; % arquivo mal identado
 filename_vec{i} = 'sppnw09.txt'; optimal_vec{i} = 67760; i = i+1;
 filename_vec{i} = 'sppnw10.txt'; optimal_vec{i} = 68271; i = i+1;
 filename_vec{i} = 'sppnw12.txt'; optimal_vec{i} = 14118; i = i+1;
 filename_vec{i} = 'sppnw15.txt'; optimal_vec{i} = 67743; i = i+1;
-% filename_vec{i} = 'sppnw19.txt'; optimal_vec{i} = 10898; i = i+1; % arquivo mal identado
 filename_vec{i} = 'sppnw20.txt'; optimal_vec{i} = 16812; i = i+1;
 filename_vec{i} = 'sppnw21.txt'; optimal_vec{i} = 7408; i = i+1;
 filename_vec{i} = 'sppnw22.txt'; optimal_vec{i} = 6984; i = i+1;
@@ -34,36 +31,20 @@ filename_vec{i} = 'sppnw41.txt'; optimal_vec{i} = 11307; i = i+1;
 filename_vec{i} = 'sppnw42.txt'; optimal_vec{i} = 7656; i = i+1;
 filename_vec{i} = 'sppnw43.txt'; optimal_vec{i} = 8904;
 
-foldername = datestr(datetime); foldername(foldername ==  ':') = ' ';
-foldername = strcat('.\results\', foldername, '\');
-mkdir(foldername);
+
+foldername = strcat('.\results\');
+fprintf('[problem] [real optimal] [optimal found] [gap de optimalidade]   [time]   [CPU time]   [feasible sol qtt] [n iterations] [feasible percentage]\n');
 for idx = 1:i
   filename = filename_vec{idx}; optimal = optimal_vec{idx};
 
-  variables_declaration;
-  
-  % set all parameters
-  model_settings;
-    
-  % run model
-  model.time_init = datetime;
-  model.cpu_time = cputime;
-  try
-    model = model.run(model); 
-  catch
-    save('flushed_results.mat');
-  end
-
-  % get time information
-  model.cpu_time = cputime - model.cpu_time;
-  model.time_end = datetime;
-  model.time = model.time_end - model.time_init; 
-
-  fprintf('\n- genetic algorithm elapsed time: %s,\n', model.time);
-  display(model.P_costs(1:model.N_best, :));
-  
   % save results
-  output_file = strcat(foldername, filename_vec{idx}(1:(end-4)),...
+  result_file = strcat(foldername, filename_vec{idx}(1:(end-4)),...
                        '_results.mat');
-  save(output_file);
+  load(result_file, 'model');
+  
+  % printf to display results in command line    
+  fprintf('   %s        %05d          %05d             %.4f          %s   %08.3f           %04d            %05d             %07.4f \n',...
+          upper(model.filename(4:7)),...
+          model.optimal, model.P_costs(1,1), abs( model.optimal - model.P_costs(1,1))*100/model.optimal,...
+          model.time, model.cpu_time, length(model.feasible_sol), model.generation, length(model.feasible_sol)*100/(model.generation*model.N_per_pop*model.N_pop));
 end
